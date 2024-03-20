@@ -1,0 +1,21 @@
+---
+-  hosts: all
+   become: true
+   tasks:
+     -  name: list log files on control node and store in a text file
+        shell: sudo ls -l /var/log/*.log > /tmp/log_file_names.txt || true
+        register: log_files
+        ignore_errors: true
+
+     -  name: copy log files from control node if it exists
+        fetch:
+          src: "{{ item }}"
+          dest: /tmp/control_logs
+          flat: yes
+        with_lines: "{{ log_files.stdout_lines | default([]) }}"
+        when: log_files.rc == 0
+
+     -  name: check if log files were found
+        fail:
+          msg: "No log files found"
+        when: log_files.rc != 0 or log_files.stdout_lines is not defined

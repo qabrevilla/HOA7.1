@@ -1,0 +1,17 @@
+---
+- name: Collect log files from control node
+  hosts: 192.168.56.118
+  tasks:
+    -  name: Ensure log directory exists
+       file:
+         path: /var/log/
+         state: directory
+
+- name: copy log files from control node to manage node
+  hosts: 192.168.56.117
+  tasks:
+    -  name: copy log files
+       fetch:
+         src: /var/log/
+         dest: /tmp/logs
+         flat: yes
